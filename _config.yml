@@ -10,7 +10,7 @@ author:
 #  use site.url only inside the web feed template (e.g. requires full url incl. protocol)
 path: /jekyll-minimal-theme  
 url:  'https://speckdrumm.github.io'
-baseurl: '/'
+
 
 
 ########
