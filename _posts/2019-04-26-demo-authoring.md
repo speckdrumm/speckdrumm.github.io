@@ -210,8 +210,93 @@ window.
 and which entities are currently selected. Selections are reflected by the designers shown in the property grid.
 * Status Bar - Basic APIs for controlling the contents and color of the status bar.
 
-
-
+I'll refrain from detailing the UI components that come with bart. They're listed in the diagram listed next and
+should be pretty self explanatory:
 
 ![Bart](/assets/bart_tool.png){: .center-image }
+*Basic components that make up Bart*
+
+## Speckdrumm.Bart.Stubble
+
+As explained, Bart by itself does nothing particularily useful. Only an extended Bart 
+is a good Bart! I worked on various packages over the years. These included an 
+integration for a modular software synthesizer concept suggested by Muhmac^Speckdrumm 
+and a package that wrapped our DirectX based successor to our previous engine. For various
+reasons none of these attempts really paid off in the end. In May 2015 I started a new 
+package based on a concept made by Muhmac. I called it 'Stubble' to keep our peculiar wording
+consistent ;). Stubble is a Lua based live programming environment that in a way is 
+pretty similar to Hennecke. 
+
+It supports the creation of graphs made of nodes. Nodes share data via their 
+input- and output pins that are now explicitly visualized. Input pins can 
+also be animated via a pattern editor that is similar to [GNU Rocket](https://github.com/rocket/rocket).
+Finally any graph and an associated pattern can be laid out in a sequence that
+indicates the general flow of the demo.
+
+Stubble improves upon Hennecke by supporting a live coding approach. It is possible to
+add a new lua file to the project, define a new node with various pins and instantly use
+that node to drive some kind of logic. When pins are changed, the node representation for
+all instances of this node are instantly updated. When execution logic is changed, the new
+behavior will be instantly visible after the file has been saved. In fact the entire render
+loop of Stubble is written in lua and the demotool will generate lua code at runtime 
+reflecting the topology of any graph that's created and the position of any track item that's
+put into a sequence track. Working with Stubble looks a little bit like this:
+
+![Stubble UI](/assets/stubble_ui.png)
+*Some of the functionality provided by Stubble*
+
+Here's an overview of the components Stubble integrates into Bart:
+
 ![Stubble](/assets/stubble_package.png){: .center-image }
+*Stubble components that extend Bart*
+
+Stubble is a large piece of software. It took me two years of my spare time to get the 
+basics to work. I pretty much did it all by myself apart from some GL rendering code that
+was sponsored by Muhmac. By March 2017 we had a private [slack channel](https://www.slack.com),
+[Team City](https://www.jetbrains.com/teamcity/) as a build server and a self hosted 
+[Gitlab](https://about.gitlab.com/) instance. We were ready for a test run and so I gave the
+tool to [JCO](http://www.jco.de/). At this time, only a coder could use Stubble since every
+node we'd need would have to be made from scratch. Jco didn't flinch. Within two weeks he
+wrote up some simple scene graph traversal code, made a Cinema 4D exporter plugin that would
+convert a scene into code that fitted his lua representation and created 
+[sp04 - Hello, Kevin - A Dental Journey](https://www.pouet.net/prod.php?which=69701). The demo
+ranked 2nd at Revision 2017 and earned a 
+[meteoriks nomination for best direction](https://2018.meteoriks.org/winners#nominees-83)
+later that year.
+
+One year - and three demos later - we released [Echo Chamber](https://www.pouet.net/prod.php?which=75780) at
+Revision 2018, ranking third and again scoring a [meteoriks nomation for best direction](https://2019.meteoriks.org/nominees#nominees-83).
+By then it became quite clear that our Lua based live coding approach had one big problem:
+As mentioned, each frame of the demo is driven by Lua. Echo Chamber uses cube maps to render
+reflecting objects and comes with many more objects than previous demos. Due to overhead LUA
+imposes we became severely CPU bound. Echo Chamber ran ok on the compo machine but it was clear
+that we had to do something about these performance issues.
+
+After testing several alternative Lua implementations I concluded that we already used the [fastest
+version](https://www.moonsharp.org/) that was available to us. I thought about this a little bit
+and came up with a new approach: integrate C# as a runtime script into the demo tool and make sure
+that C# nodes can be used just as if they were written in Lua.
+
+Fortunately, the C# compiler made by Microsoft [is open source these days](https://github.com/dotnet/roslyn)
+and generally in a great shape. In around a month I had a proof of concept that showed that this could
+actually work. It would take most of the year though until we arrived at the state we needed to be able to
+use C# in production. In order to demonstrate that we were ready I ported the party version of Echo Chamber 
+to C#, yielding pretty immense speed ups.
+
+I also worked on a full Visual Studio integration feature. As it is today users of Stubble can press a button and
+Visual Studio will be launched (or refreshed) automatically, opening a generated project that contains all 
+C#+Lua scripts and shaders added in Stubble. The Visual Studio project also contains two configuration
+made to interact with the current tool state when executed under:
+
+* Build in Stubble - Tell the currently running demo tool to (incrementally) recompile the C# scripts and to update
+all C# node instances which will refresh the overall behavior to the most current source code state.
+* Debug - Tell the current Visual Studio instance to attach to Bart via COM automation. By doing this we can
+debug the current state of the demo and live inspect all node values that are of interest. This works because
+in-tool script compilation always yields updated symbol data associated with a new version of the assembly.
+
+![Stubble](/assets/vs_support.png){: .center-image }
+*A Visual Studio project generated by Stubble*
+
+Finally, I implemented a file watching service and a resource monitor. The former is now a core service because it
+is just immensely useful to be able to react to file writes. The resource monitor uses the file watcher service to
+ensure that whenever any part of a resource is written, the tool will refresh its live state.
