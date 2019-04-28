@@ -144,4 +144,74 @@ stone for the demo tool we're still using today.
 
 # Bart Tool
 
-yada!
+During the time when we still thought about doing a game entry, I worked on a [Visual Studio](https://visualstudio.microsoft.com/)
+extension for my master's degree in software engineering. With time I familiarized myself
+with the APIs Visual Studio provides and learned how the architecture fit together. 
+I became more and more convinced that it would be fun to duplicate this general approach
+and end up with an extensible shell that could be used for many different scenarios.
+Going this route was probably the boldest violation of the [KISS](https://en.wikipedia.org/wiki/KISS_principle) 
+principle I ever dared to engage in ;). It obviously wasn't an efficient way to continue making demos.
+It didn't matter to me though since this was a hobby project and I did this just for fun and
+because I could.
+
+## Bart Basics
+
+Bart by itself is an application that - very much like Visual Studio - comes as a generic extensible
+shell. It is again written in C# and the core UI is based on Windows Forms.
+By default it can manage solutions and projects that may be part of a solution, display properties,
+show tabbed log output and provide base services such as the ability to open a project item using an
+editor.
+
+When Bart starts it searches the file system for .dll files in its assemblies subdirectory and
+uses reflection to test if any such assembly provides a so called 'package' implementation.
+Packages are extension points into the application and are able to add various kinds of functionality
+to the demo tool.
+
+A package may contain the following components:
+* Properties - Serializable values that may influence the behavior of the package. Accessible to the user
+via the options menu and comparable to Visual Studio's Tools->Options dialog.
+* Editor Factories - A set of factories that provide new editors to the tool.
+* Project Factories - A set of factories that provide new projects to the tool. Any project may influence
+the set of available project items, tool windows and come with extra context information.
+* Project Item Factories - A set of factories that support addition of a specific kind of item to a project.
+* Property Designer Factories - These components add new ways to visualize values in the built-in property grid.
+* Context Menu Commands - These commands can extend the application context menu or the solution explorer.
+* System Services - An addition to Bart's internal service system. Services can be retrieved by interface
+and are automatically integrated with the built in dependency injection mechanism to support multiple schemes
+of automatic service injection. *Bart does not use singletons*.
+* Named Pipe handlers - These are extensions to the generic named pipe server that comes built in. As it is
+today we use named pipes to speed up our scene importing workflow (one-click import) and push C# compilation
+requests from generated Visual Studio projects containing demos scripts.
+* Custom init code - on initialization a package is handed an interface that provides it with full access to
+any service it may desire. Our current demo system uses this approach to create a new tool window and prepare
+rendering.
+
+![Package](/assets/bart_package.png){: .center-image }
+*Common extension points any Bart package may provide*
+
+Bart initializes all packages it finds. It also comes with an array of core services and of course various 
+UI components in order to facilitate ineraction with the user.
+
+Core services are as follows:
+* Solution manager - Provides API access for the one solution the tool can manage at every point in time.
+* Shell - Various APIs for influencing docking, layout, access to the main window.
+* Editor handling - Editor Factory registration, editor state management, various editor specific events.
+* Named pipe server - Provides registration APIs for synchronous and asynchronous named pipe handlers.
+* File Watcher - Monitors all project directories and provides file change events and APIs to determine when 
+files have last been written to.
+* IOC - provides access to tool services and allows registration of new services.
+* Focus handling - Keeps track of the active form and gives views the opportunity to handle user input
+starting with the most concrete child control and going up the ownership chain until arriving at the tool main
+window.
+* Log Output - Provides services similar to Visual Studio's output window.
+* Packages - Supports the package management infrastructure and provides APIs for pacakge property (de)serialization.
+* Project Types - Provides API access for project- and project item factory management and retrieval.
+* Selection - A service that keeps track of all entities that are selectable in the current usage context
+and which entities are currently selected. Selections are reflected by the designers shown in the property grid.
+* Status Bar - Basic APIs for controlling the contents and color of the status bar.
+
+
+
+
+![Bart](/assets/bart_tool.png){: .center-image }
+![Stubble](/assets/stubble_package.png){: .center-image }
