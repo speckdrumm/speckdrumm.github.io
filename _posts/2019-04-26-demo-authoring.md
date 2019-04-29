@@ -25,7 +25,7 @@ Table of Contents:
 1. [Demo making Challenges](#demo-making-challenges)
 2. My past approaches to demo making
 	1. [The naive approach](#the-naive-approach)
-	2. [Demo Scripting](#demo-scripting)
+	2. [Demo scripting](#demo-scripting)
 	3. [Hennecke.Net](#henneckenet)
 3. [Bart Tool](#bart-tool)
 	1. [Bart Basics](#bart-basics)
@@ -56,7 +56,7 @@ Obviously this had some major drawbacks. Every time any number is changed the ex
 be recompiled. Afterwards the entire demo has to be reloaded. Most time is spent waiting
 and little time is spent on tweaking. Clearly a more efficient way of authoring content was needed.
 
-## Demo Scripting
+## Demo scripting
 
 My first approach to solving this problem was pretty much copied from the 
 [Farbrausch](http://www.farbrausch.de/) release [Fr09 - Goldrausch](https://www.pouet.net/prod.php?which=2903).
