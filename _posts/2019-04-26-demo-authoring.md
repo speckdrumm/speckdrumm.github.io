@@ -192,7 +192,7 @@ rendering.
 *Common extension points any Bart package may provide*
 
 Bart initializes all packages it finds. It also comes with an array of core services and of course various 
-UI components in order to facilitate ineraction with the user.
+UI components in order to facilitate interaction with the user.
 
 The most important core services are as follows:
 * Solution manager - Provides API access for the one solution the tool can manage at every point in time.
@@ -225,7 +225,7 @@ is a good Bart! I worked on various packages over the years. These included an
 integration for a modular software synthesizer concept suggested by Muhmac^Speckdrumm 
 and a package that wrapped our DirectX based successor to our previous engine. For various
 reasons none of these attempts really paid off in the end. In May 2015 I started a new 
-package based on a concept made by Muhmac. I called it 'Stubble' to keep our peculiar wording
+package based on a concept suggested by Muhmac. I called it 'Stubble' to keep our peculiar wording
 consistent ;). Stubble is a Lua based live programming environment that in a way is 
 pretty similar to Hennecke. 
 
