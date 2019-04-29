@@ -168,17 +168,17 @@ Packages are extension points into the application and are able to add various k
 to the demo tool.
 
 A package may contain the following components:
-* Properties - Serializable values that may influence the behavior of the package. Accessible to the user
-via the options menu and comparable to Visual Studio's Tools->Options dialog.
+* Properties - Serializable values that may influence the behavior of the package. Package properties are
+accessible to the user via the options menu which is similar to Visual Studio's Tools->Options dialog.
 * Editor Factories - A set of factories that provide new editors to the tool.
 * Project Factories - A set of factories that provide new projects to the tool. Any project may influence
-the set of available project items, tool windows and come with extra context information.
+the set of available project items and come with extra contextual information.
 * Project Item Factories - A set of factories that support addition of a specific kind of item to a project.
 * Property Designer Factories - These components add new ways to visualize values in the built-in property grid.
 * Context Menu Commands - These commands can extend the application context menu or the solution explorer.
 * System Services - An addition to Bart's internal service system. Services can be retrieved by interface
 and are automatically integrated with the built in dependency injection mechanism to support multiple schemes
-of automatic service injection. *Bart does not use singletons*.
+of automatic service injection. *Bart does not use singletons and dependency injection is used everywhere*.
 * Named Pipe handlers - These are extensions to the generic named pipe server that comes built in. As it is
 today we use named pipes to speed up our scene importing workflow (one-click import) and push C# compilation
 requests from generated Visual Studio projects containing demos scripts.
@@ -192,7 +192,7 @@ rendering.
 Bart initializes all packages it finds. It also comes with an array of core services and of course various 
 UI components in order to facilitate ineraction with the user.
 
-Core services are as follows:
+The most important core services are as follows:
 * Solution manager - Provides API access for the one solution the tool can manage at every point in time.
 * Shell - Various APIs for influencing docking, layout, access to the main window.
 * Editor handling - Editor Factory registration, editor state management, various editor specific events.
@@ -210,11 +210,11 @@ window.
 and which entities are currently selected. Selections are reflected by the designers shown in the property grid.
 * Status Bar - Basic APIs for controlling the contents and color of the status bar.
 
-I'll refrain from detailing the UI components that come with bart. They're listed in the diagram listed next and
+I'll refrain from detailing the UI components that come with Bart. They're listed in the diagram listed next and
 should be pretty self explanatory:
 
 ![Bart](/assets/bart_tool.png){: .center-image }
-*Basic components that make up Bart*
+*Notable components that make up Bart*
 
 ## Speckdrumm.Bart.Stubble
 
@@ -235,12 +235,13 @@ indicates the general flow of the demo.
 
 Stubble improves upon Hennecke by supporting a live coding approach. It is possible to
 add a new lua file to the project, define a new node with various pins and instantly use
-that node to drive some kind of logic. When pins are changed, the node representation for
-all instances of this node are instantly updated. When execution logic is changed, the new
-behavior will be instantly visible after the file has been saved. In fact the entire render
-loop of Stubble is written in Lua and the demotool will generate Lua code at runtime 
-reflecting topology changes in any graph that's updated and realize the position of any track item that's
-put into a sequence track. Working with Stubble looks a little bit like this:
+that node to drive some kind of logic in a graph. When pins are changed, the node 
+representation for all instances of this node are instantly updated. 
+When execution logic is changed, the new behavior will be instantly visible after the 
+file has been saved. In fact the entire render loop of Stubble is written in Lua and 
+the demotool will generate Lua code at runtime reflecting topology changes in any graph 
+that's updated and realize the position of any track item that's put into a sequence track.
+Working with Stubble looks a little bit like this:
 
 ![Stubble UI](/assets/stubble_ui.png)
 *Some of the functionality provided by Stubble*
@@ -287,24 +288,37 @@ to C#, yielding pretty immense speed ups.
 
 I also worked on a full Visual Studio integration feature. As it is today users of Stubble can press a button and
 Visual Studio will be launched (or refreshed) automatically, opening a generated project that contains all 
-C#+Lua scripts and shaders added in Stubble. The Visual Studio project also contains two configuration
-made to interact with the current tool state when executed under:
+C#+Lua scripts and shaders added in Stubble. The Visual Studio project also contains two configurations
+made to interact with the current tool state when the project is executed:
 
 * Build in Stubble - Tell the currently running demo tool to (incrementally) recompile the C# scripts and to update
 all C# node instances which will refresh the overall behavior to the most current source code state.
-* Debug - Tell the current Visual Studio instance to attach to Bart via COM automation. By doing this we can
-debug the current state of the demo and live inspect all node values that are of interest. This works because
-in-tool script compilation always yields updated symbol data associated with a new version of the assembly.
+* Debug - Tell the current Visual Studio instance to attach to the Bart process via COM automation. By doing 
+so we can debug the current state of the demo and live inspect all node values that are of interest. 
+This works because in-tool script compilation in contrast to the final export data always yields updated symbol 
+data associated with a new version of the assembly.
 
 ![Stubble](/assets/vs_support.png){: .center-image }
 *A Visual Studio project generated by Stubble*
 
 Finally, I implemented a file watching service and a resource monitor. The former is now a core service because it
 is just immensely useful to be able to react to external file writes as they happen. 
-The resource monitor uses the file watcher service to ensure that whenever any part of 
-a resource is written, the tool will refresh its live state. This way we can now use Visual Studio for all things
+The resource monitor uses the file watcher service to ensure that whenever any project file is written on disk,
+the tool will reload affected resources and refresh its live state. This way we can now use Visual Studio for all things
 live coding. We still have [Scintilla](https://www.scintilla.org/) based editors in our demotool that work okay
 but Visual Studio is just hard to beat.
+
+Since a demo tool's job is only done when it has produced an executable I've also had to 
+integrate the Roslyn compiler with our exporter logic. During demo export I use Roslyn to
+compile all C# scripts into a 'merge assembly'. I also include our zipped demo assets in the
+form of an assembly manifest resource stream. This assembly is finally merged into a copy 
+of the player executable using  [ILMerge](https://github.com/dotnet/ILMerge). 
+ILMerge also allows me to influence executable attributes, the demo icon and turn on 
+some options useful for player standalone debugging. At the end of it all, we get a finished
+executable ready for the compo. And that's where we are today.
+
+![Exporting a demo in Stubble](/assets/demo_exporter.png){: .center-image }
+*One-click export in Stubble*
 
 What else to say? If you're still reading this then first of all thanks for your interest ;) It's been a wild ride
 doing demos for so long but I've learned a lot, had some fun and made some friends on the way.
