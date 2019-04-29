@@ -28,6 +28,8 @@ Table of Contents:
 	2. [Demo Scripting](#demo-scripting)
 	3. [Hennecke.Net](#henneckenet)
 3. [Bart Tool](#bart-tool)
+	1. [Bart Basics](#bart-basics)
+	2. [Speckdrumm.Bart.Stubble](#speckdrummbartstubble)
 
 ## Demo making challenges
 
