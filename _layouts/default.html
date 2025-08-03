@@ -31,7 +31,12 @@
 
 <header class="{% if site.dark_header %}dark{% endif %}">
   {% unless site.hide_title %}
-    <h1><a href="{{ "/" | relative_url }}">{{ site.title | escape }}</a></h1>
+    <h1 style="display: flex; align-items: center; gap: 0.5em;">
+      <a href="{{ "/" | relative_url }}" style="display: flex; align-items: center; text-decoration: none;">
+        <img src="{{ "/assets/speckdrumm.png" | relative_url }}" alt="Logo" style="height: 2em; vertical-align: middle;">
+        <span style="margin-left: 0.5em;">{{ site.title | escape }}</span>
+      </a>
+    </h1>
   {% endunless %}
   {% if site.navigation %}
     <nav>

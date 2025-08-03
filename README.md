@@ -27,6 +27,6 @@ To run this project, you need to have **Ruby** and **Bundler** installed.
 
 To start a local server and view the website, you can use the provided `serve.sh` script:
 ```bash
-sh serve.sh
+./serve.sh
 ```
 The site will be available at **`http://127.0.0.1:4000`** in your browser.
