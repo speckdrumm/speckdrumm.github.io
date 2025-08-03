@@ -1,0 +1,19 @@
+---
+---
+
+// Definiere die fehlende Variable
+$link-color: #007bff
+
+// Definiere die Funktion (angenommen, sie dunkelt eine Graustufe ab)
+@function reduce($percent)
+  @return darken(#6c757d, $percent)
+
+// Jetzt die Partials importieren
+@import 'index'
+@import 'basic'
+@import 'layout'
+@import 'anchor'
+@import 'darkmode'
+@import 'highlight'
+@import 'minimal'
+@import 'theme'
